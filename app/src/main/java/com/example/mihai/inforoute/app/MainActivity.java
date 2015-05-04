@@ -1,30 +1,63 @@
 package com.example.mihai.inforoute.app;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
+import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.Toast;
 
+public class MainActivity extends Activity {
+    private Spinner spinner1, spinner2;
+    private Button btnCalculate;
 
-public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
+        addItemsOnSpinner2();
+        addListenerOnButton();
+        addListenerOnSpinnerItemSelection();
+
+    }
+    public void addItemsOnSpinner2() {
+
+        spinner2 = (Spinner) findViewById(R.id.spinner2);
     }
 
+    public void addListenerOnSpinnerItemSelection() {
+        spinner1 = (Spinner) findViewById(R.id.spinner1);
+    }
+
+    // get the selected dropdown list value
+    public void addListenerOnButton() {
+
+        spinner1 = (Spinner) findViewById(R.id.spinner1);
+        spinner2 = (Spinner) findViewById(R.id.spinner2);
+        btnCalculate = (Button) findViewById(R.id.btnCalculate);
+
+        btnCalculate.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if(spinner1.getSelectedItem() == spinner2.getSelectedItem())
+                {
+                    Toast.makeText(getApplicationContext(),
+                            "The starting point must be different from the point of arrival !",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+        });
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
