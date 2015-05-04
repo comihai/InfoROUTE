@@ -4,6 +4,8 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="city_prompt">Choose a city</string>
+    <string name="title_forecastfragment">Informations</string>
+    <string name="action_refresh" translatable="false">Refresh</string>
     <string name="question">Enter your starting point and the finish point of your route to find information about weather and road conditions :</string>
     <string-array name="city_arrays">
         <item>Bucuresti</item>

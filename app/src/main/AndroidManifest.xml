@@ -28,6 +28,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ForecastActivity"
+            android:label="@string/title_forecastfragment"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.mihai.inforoute.app.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
