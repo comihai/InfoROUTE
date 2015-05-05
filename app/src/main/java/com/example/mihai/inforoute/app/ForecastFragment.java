@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +50,8 @@ import java.util.ArrayList;
 public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> mForecastAdapter;
-    private String arrivalCity=null;
+    private String arrivalCity=null, departureCity = null;
+    private TextView text_dist, text_status, text_speed, text_time, text_cons, text_totalCons, text_cost, text_index;
     public ForecastFragment() {
     }
 
@@ -57,13 +59,20 @@ public class ForecastFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = this.getArguments();
+
         if(bundle != null) {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
             arrivalCity = bundle.getString("arrivalCity");
+            departureCity = bundle.getString("departureCity");
+            getActivity().setTitle(departureCity + " -> "+arrivalCity);
+
+            FetchWeatherTask weatherTask = new FetchWeatherTask();
             weatherTask.execute(arrivalCity);
+
+            FetchRouteTask routeTask = new FetchRouteTask();
+            routeTask.execute(departureCity,arrivalCity);
+
         }
         // Add this line in order for this fragment to handle menu events.
-
         setHasOptionsMenu(true);
     }
 
@@ -99,7 +108,25 @@ public class ForecastFragment extends Fragment {
                         new ArrayList<String>());
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        text_dist = (TextView)rootView.findViewById(R.id.list_item_distance_textview);
+        text_dist.setText("");
+        text_dist.setVisibility(View.GONE);
+        text_status = (TextView)rootView.findViewById(R.id.list_item_status_textview);
+        text_status.setText("");
+        text_status.setVisibility(View.GONE);
 
+        text_speed = (TextView)rootView.findViewById(R.id.list_item_speed_textview);
+        text_speed.setVisibility(View.GONE);
+        text_time = (TextView)rootView.findViewById(R.id.list_item_time_textview);
+        text_time.setVisibility(View.GONE);
+        text_cons = (TextView)rootView.findViewById(R.id.list_item_consum_textview);
+        text_cons.setVisibility(View.GONE);
+        text_totalCons = (TextView)rootView.findViewById(R.id.list_item_consum_total_textview);
+        text_totalCons.setVisibility(View.GONE);
+        text_cost = (TextView)rootView.findViewById(R.id.list_item_cost_textview);
+        text_cost.setVisibility(View.GONE);
+        text_index = (TextView)rootView.findViewById(R.id.list_item_index_textview);
+        text_index.setVisibility(View.GONE);
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
@@ -272,7 +299,7 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.i(LOG_TAG, "Jsonul este  : "+forecastJsonStr);
+                Log.v(LOG_TAG, "Jsonul este  : "+forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -310,6 +337,133 @@ public class ForecastFragment extends Fragment {
                     mForecastAdapter.add(dayForecastStr);
                 }
                 // New data is back from the server.  Hooray!
+            }
+        }
+    }
+    public class FetchRouteTask extends AsyncTask<String, Void, String[]> {
+
+        private final String LOG_TAG = FetchRouteTask.class.getSimpleName();
+
+        private String[] getRouteDataFromJson(String routeJsonStr)
+                throws JSONException {
+
+            // These are the names of the JSON objects that need to be extracted.
+            final String OWM_DISTANCE = "distanta";
+            final String OWM_STATUS = "status";
+
+
+            JSONObject routeJson = new JSONObject(routeJsonStr);
+            String resultStrs[] = new String[2];
+
+            resultStrs[0] = routeJson.getString(OWM_DISTANCE);
+            resultStrs[1] = routeJson.getString(OWM_STATUS);
+            return resultStrs;
+        }
+        @Override
+        protected String[] doInBackground(String... params) {
+            Log.v(LOG_TAG, "Params  : "+ params[0] + " "+params[1]);
+            // If there's no zip code, there's nothing to look up.  Verify size of params.
+            if (params.length == 0) {
+                return null;
+            }
+
+            // These two need to be declared outside the try/catch
+            // so that they can be closed in the finally block.
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            // Will contain the raw JSON response as a string.
+            String routeJsonStr = null;
+
+
+            try {
+                // Construct the URL for the OpenWeatherMap query
+                // Possible parameters are avaiable at OWM's forecast API page, at
+                // http://openweathermap.org/API#forecast
+                final String ROUTE_BASE_URL =
+                        "http://192.168.0.106:8080/routeInfo/index.php?";
+                final String NAME1_PARAM = "name1";
+                final String NAME2_PARAM = "name2";
+
+
+                Uri builtUri = Uri.parse(ROUTE_BASE_URL).buildUpon()
+                        .appendQueryParameter(NAME1_PARAM, params[0])
+                        .appendQueryParameter(NAME2_PARAM, params[1])
+                        .build();
+
+                URL url = new URL(builtUri.toString());
+                Log.v(LOG_TAG, "Url  : "+url.toString());
+                // Create the request to OpenWeatherMap, and open the connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                // Read the input stream into a String
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    return null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    return null;
+                }
+                routeJsonStr = buffer.toString();
+                Log.v(LOG_TAG, "Jsonul route este  : "+routeJsonStr);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+                // If the code didn't successfully get the weather data, there's no point in attemping
+                // to parse it.
+                return null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+
+            try {
+                return getRouteDataFromJson(routeJsonStr);
+            } catch (JSONException e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            // This will only happen if there was an error getting or parsing the forecast.
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
+                text_dist.setText(result[0] + " Km");
+                text_dist.setVisibility(View.VISIBLE);
+                text_status.setText(result[1]);
+                text_status.setVisibility(View.VISIBLE);
+
+                text_speed.setVisibility(View.VISIBLE);
+                text_time.setVisibility(View.VISIBLE);
+                text_cons.setVisibility(View.VISIBLE);
+                text_totalCons.setVisibility(View.VISIBLE);
+                text_cost.setVisibility(View.VISIBLE);
+                text_index.setVisibility(View.VISIBLE);
             }
         }
     }

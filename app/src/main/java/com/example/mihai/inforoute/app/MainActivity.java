@@ -55,8 +55,10 @@ public class MainActivity extends ActionBarActivity {
                 else
                 {
                     Intent intent = new Intent(getApplicationContext(), ForecastActivity.class);
-                    String message = spinner2.getSelectedItem().toString();
-                    intent.putExtra(EXTRA_MESSAGE, message);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("departureCity",spinner1.getSelectedItem().toString());
+                    bundle.putString("arrivalCity",spinner2.getSelectedItem().toString());
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }
             }

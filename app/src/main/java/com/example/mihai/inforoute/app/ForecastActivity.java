@@ -1,6 +1,5 @@
 package com.example.mihai.inforoute.app;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.ArrayAdapter;
@@ -19,11 +18,10 @@ public class ForecastActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forecast_activity_main);
-
-        Intent intent = getIntent();
-        String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        Bundle intentBundle = getIntent().getExtras();
         Bundle bundle = new Bundle();
-        bundle.putString("arrivalCity",message);
+        bundle.putString("arrivalCity",intentBundle.getString("arrivalCity"));
+        bundle.putString("departureCity",intentBundle.getString("departureCity"));
         ForecastFragment forecastFragment = new ForecastFragment();
         forecastFragment.setArguments(bundle);
 
