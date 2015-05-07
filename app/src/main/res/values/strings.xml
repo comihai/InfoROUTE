@@ -16,4 +16,5 @@
         <item>Sibiu</item>
         <item>Cluj-Napoca</item>
     </string-array>
+    <string name="title_activity_detail">DetailActivity</string>
 </resources>
