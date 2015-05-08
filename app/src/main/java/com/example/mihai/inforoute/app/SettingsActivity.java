@@ -5,6 +5,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 /**
  * Created by mihai on 5/8/2015.
@@ -16,11 +17,14 @@ public class SettingsActivity extends PreferenceActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Add 'general' preferences, defined in the XML file
-        // TODO: Add preferences from XML
+        addPreferencesFromResource(R.xml.pref_general);
 
         // For all preferences, attach an OnPreferenceChangeListener so the UI summary can be
         // updated when the preference changes.
-        // TODO: Add preference
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_noDays_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_speed_key)));
+
+
     }
 
     /**
@@ -42,7 +46,10 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object value) {
+
+
         String stringValue = value.toString();
+        int temp;
 
         if (preference instanceof ListPreference) {
             // For list preferences, look up the correct display value in
@@ -54,7 +61,16 @@ public class SettingsActivity extends PreferenceActivity
             }
         } else {
             // For other preferences, set the summary to the value's simple string representation.
-            preference.setSummary(stringValue);
+            temp = Integer.parseInt(stringValue);
+            if(temp <= 0 || temp > 14)
+            {
+                Toast.makeText(getApplicationContext(),
+                        "The number of days must be between 1 and 14!",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else {
+                preference.setSummary(stringValue);
+            }
         }
         return true;
     }

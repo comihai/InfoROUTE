@@ -28,14 +28,30 @@
 
         <LinearLayout
             android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:gravity="center_horizontal">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal">
+            <!--<View-->
+                <!--android:layout_width="1dp"-->
+                <!--android:layout_height="10dp"-->
+                <!--android:layout_weight="1"/>-->
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
             <View
                 android:layout_width="1dp"
-                android:layout_height="20dp"
+                android:layout_height="5dp"
                 android:layout_weight="1"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -44,20 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Status:"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Speed:"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Time:"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gasoline consumption:"/>
         </LinearLayout>
         <LinearLayout
             android:layout_height="wrap_content"
@@ -65,38 +68,111 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal">
+            <!--<View-->
+                <!--android:layout_width="1dp"-->
+                <!--android:layout_height="10dp"-->
+                <!--android:layout_weight="1"/>-->
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
             <View
                 android:layout_width="1dp"
-                android:layout_height="20dp"
+                android:layout_height="5dp"
                 android:layout_weight="1"/>
             <TextView
                 android:id="@+id/list_item_distance_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="100 Km/h"/>
+                android:text="100 Km"/>
 
             <TextView
                 android:id="@+id/list_item_status_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="good"/>
-            <TextView
-                android:id="@+id/list_item_speed_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="71 Km/h"/>
 
-            <TextView
-                android:id="@+id/list_item_time_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="6 h 8 min"/>
+        </LinearLayout>
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/list_item_consum_textview"
-                android:layout_width="wrap_content"
+        <View
+            android:id="@+id/view"
+            android:layout_toRightOf="@+id/text1"
+            android:layout_width="1dip"
+            android:layout_height="fill_parent"
+            android:background="@android:color/darker_gray"/>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
                 android:layout_height="wrap_content"
-                android:text="12 l/100 Km"/>
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Speed:"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time:"/>
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/list_item_speed_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="71 Km/h"/>
+
+                <TextView
+                    android:id="@+id/list_item_time_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="6 h 8 min"/>
+
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -110,25 +186,26 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal">
-
+            <!--<View-->
+                <!--android:layout_width="1dp"-->
+                <!--android:layout_height="5dp"-->
+                <!--android:layout_weight="1"/>-->
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="5dp"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gasoline consumption:"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Total consumption:"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cost:"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Index:"/>
-            <View
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:layout_weight="1"/>
         </LinearLayout>
 
         <LinearLayout
@@ -137,28 +214,30 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal">
-
+            <!--<View-->
+                <!--android:layout_width="1dp"-->
+                <!--android:layout_height="5dp"-->
+                <!--android:layout_weight="1"/>-->
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="5dp"
+                android:layout_weight="1"/>
+            <TextView
+                android:id="@+id/list_item_consum_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12 l/100 Km"/>
             <TextView
                 android:id="@+id/list_item_consum_total_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="52.5 l"/>
 
-            <TextView
-                android:id="@+id/list_item_cost_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="320 RON"/>
 
-            <TextView
-                android:id="@+id/list_item_index_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1.87"/>
-            <View
-                android:layout_width="1dp"
-                android:layout_height="20dp"
-                android:layout_weight="1"/>
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
@@ -166,6 +245,191 @@
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:gravity="center_horizontal">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:gravity="center_horizontal">
+
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="5dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cost:"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="5dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/list_item_cost_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="320 RON"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/view1"
+            android:layout_toRightOf="@+id/text1"
+            android:layout_width="1dip"
+            android:layout_height="fill_parent"
+            android:background="@android:color/darker_gray"/>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="5dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Index:"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="5dp"-->
+                    <!--android:layout_weight="1"/>-->
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    android:id="@+id/list_item_index_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.87"/>
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="5dp"
+                    android:layout_weight="1"/>
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"/>
+                <!--<View-->
+                    <!--android:layout_width="1dp"-->
+                    <!--android:layout_height="10dp"-->
+                    <!--android:layout_weight="1"/>-->
+
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+
+        <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="10dp"-->
+        <!--android:layout_weight="1"/>-->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -18,4 +18,18 @@
         <item>Cluj-Napoca</item>
     </string-array>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="pref_speed_label">Speed units</string>
+
+    <string name="pref_speed_key" translatable = "false">speed</string>
+
+    <string name="pref_speed_default" translatable = "false">Km/h</string>
+    <string name="pref_noDays_label">Number of days</string>
+
+    <string name="pref_noDays_key" translatable = "false">days</string>
+
+    <string name="pref_noDays_default" translatable = "false">7</string>
+    <string name="pref_speedUnits_label_km_h">Km/h</string>
+    <string name="pref_speedUnits_label_m_s">m/s</string>
+    <string name="pref_speedUnits_km_h">Km/h</string>
+    <string name="pref_speedUnits_m_s">m/s</string>
 </resources>

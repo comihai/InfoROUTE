@@ -16,9 +16,11 @@
 package com.example.mihai.inforoute.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -65,17 +67,27 @@ public class ForecastFragment extends Fragment {
         if(bundle != null) {
             arrivalCity = bundle.getString("arrivalCity");
             departureCity = bundle.getString("departureCity");
-            getActivity().setTitle(departureCity + " -> "+arrivalCity);
-
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute(arrivalCity);
-
-            FetchRouteTask routeTask = new FetchRouteTask();
-            routeTask.execute(departureCity,arrivalCity);
-
+            getActivity().setTitle(departureCity + " >> "+arrivalCity);
         }
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
+    }
+    private void updatePage()
+    {
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String noDays = prefs.getString(getString(R.string.pref_noDays_key),
+                getString(R.string.pref_noDays_default));
+        weatherTask.execute(arrivalCity, noDays);
+
+        FetchRouteTask routeTask = new FetchRouteTask();
+        routeTask.execute(departureCity,arrivalCity);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updatePage();
     }
 
     @Override
@@ -261,7 +273,6 @@ public class ForecastFragment extends Fragment {
 
             String format = "json";
             String units = "metric";
-            int numDays = 7;
 
             try {
                 // Construct the URL for the OpenWeatherMap query
@@ -278,7 +289,7 @@ public class ForecastFragment extends Fragment {
                         .appendQueryParameter(QUERY_PARAM, params[0])
                         .appendQueryParameter(FORMAT_PARAM, format)
                         .appendQueryParameter(UNITS_PARAM, units)
-                        .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                        .appendQueryParameter(DAYS_PARAM, params[1])
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -330,7 +341,7 @@ public class ForecastFragment extends Fragment {
             }
 
             try {
-                return getWeatherDataFromJson(forecastJsonStr, numDays);
+                return getWeatherDataFromJson(forecastJsonStr, Integer.parseInt(params[1]));
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -354,20 +365,54 @@ public class ForecastFragment extends Fragment {
     public class FetchRouteTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchRouteTask.class.getSimpleName();
+        private String formatSpeed(String speed, String unitType)
+        {
+            int speedInt = Integer.parseInt(speed);
+            String r = null;
+            if(unitType.equals(getString(R.string.pref_speedUnits_m_s)))
+            {
+                speedInt = speedInt * 10/36;
+                r = Integer.toString(speedInt) + " m/s";
+            }
+            else
+            {
+                r = Integer.toString(speedInt) + " Km/h";
+            }
+            return r;
+        }
+        private String formatTime(String time)
+        {
+            String[] parts = time.split(".");
+            return parts[0]+" h "+parts[1]+" min";
+        }
 
         private String[] getRouteDataFromJson(String routeJsonStr)
                 throws JSONException {
 
             // These are the names of the JSON objects that need to be extracted.
-            final String OWM_DISTANCE = "distanta";
+            final String OWM_DISTANTA = "distanta";
             final String OWM_STATUS = "status";
+            final String OWM_VITEZA = "viteza";
+            final String OWM_TIMP = "timp";
+            final String OWM_CONSUM = "consum";
+            final String OWM_CONSUM_TOTAL = "consum_tota";
+            final String OWM_COST = "cost";
+            final String OWM_INDICE = "indice";
 
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String speed = sharedPreferences.getString(getString(R.string.pref_speed_key),getString(R.string.pref_speedUnits_km_h));
 
-            JSONObject routeJson = new JSONObject(routeJsonStr);
-            String resultStrs[] = new String[2];
+                    JSONObject routeJson = new JSONObject(routeJsonStr);
+            String resultStrs[] = new String[8];
 
-            resultStrs[0] = routeJson.getString(OWM_DISTANCE);
+            resultStrs[0] = routeJson.getString(OWM_DISTANTA) + " Km";
             resultStrs[1] = routeJson.getString(OWM_STATUS);
+            resultStrs[2] = formatSpeed(routeJson.getString(OWM_VITEZA),speed);
+            resultStrs[3] = formatTime(routeJson.getString(OWM_TIMP));
+            resultStrs[4] = routeJson.getString(OWM_CONSUM) + " l/Km";
+            resultStrs[5] = routeJson.getString(OWM_CONSUM_TOTAL) + " l";
+            resultStrs[6] = routeJson.getString(OWM_COST) + " RON";
+            resultStrs[7] = routeJson.getString(OWM_INDICE);
             return resultStrs;
         }
         @Override
@@ -432,13 +477,16 @@ public class ForecastFragment extends Fragment {
                 }
                 routeJsonStr = buffer.toString();
                 Log.v(LOG_TAG, "Jsonul route este  : "+routeJsonStr);
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
                 return null;
-            } finally {
-                if (urlConnection != null) {
+            }
+            finally
+            {
+                if (urlConnection != null)
+                {
                     urlConnection.disconnect();
                 }
                 if (reader != null) {
@@ -449,31 +497,42 @@ public class ForecastFragment extends Fragment {
                     }
                 }
             }
-
-            try {
+            try
+            {
                 return getRouteDataFromJson(routeJsonStr);
-            } catch (JSONException e) {
+            }
+            catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
-
-            // This will only happen if there was an error getting or parsing the forecast.
             return null;
         }
 
         @Override
         protected void onPostExecute(String[] result) {
             if (result != null) {
-                text_dist.setText(result[0] + " Km");
+                text_dist.setText(result[0]);
                 text_dist.setVisibility(View.VISIBLE);
+
                 text_status.setText(result[1]);
                 text_status.setVisibility(View.VISIBLE);
 
+                text_speed.setText(result[2]);
                 text_speed.setVisibility(View.VISIBLE);
+
+                text_speed.setText(result[3]);
                 text_time.setVisibility(View.VISIBLE);
+
+                text_speed.setText(result[4]);
                 text_cons.setVisibility(View.VISIBLE);
+
+                text_speed.setText(result[5]);
                 text_totalCons.setVisibility(View.VISIBLE);
+
+                text_speed.setText(result[6]);
                 text_cost.setVisibility(View.VISIBLE);
+
+                text_speed.setText(result[7]);
                 text_index.setVisibility(View.VISIBLE);
             }
         }

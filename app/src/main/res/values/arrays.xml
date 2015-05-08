@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_speedUnits_options">
+        <item>@string/pref_speedUnits_label_km_h</item>
+        <item>@string/pref_speedUnits_label_m_s</item>
+    </string-array>
+
+    <string-array name="pref_speedUnits_values">
+        <item>@string/pref_speedUnits_km_h</item>
+        <item>@string/pref_speedUnits_m_s</item>
+    </string-array>
+</resources>

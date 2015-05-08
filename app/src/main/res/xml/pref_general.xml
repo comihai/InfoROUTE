@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditTextPreference
+        android:id="@+id/noDays"
+        android:title="@string/pref_noDays_label"
+        android:key="@string/pref_noDays_key"
+        android:defaultValue="@string/pref_noDays_default"
+        android:inputType="number"
+        android:singleLine="true"/>
+
+    <ListPreference
+        android:title="@string/pref_speed_label"
+        android:key="@string/pref_speed_key"
+        android:defaultValue="@string/pref_speed_default"
+        android:entryValues="@array/pref_speedUnits_values"
+        android:entries="@array/pref_speedUnits_options" />
+
+</PreferenceScreen>
