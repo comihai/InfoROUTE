@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 public class ForecastActivity extends ActionBarActivity {
 
     private ArrayAdapter<String> mForecastAdapter;
+    private String arrivalCity = null, departureCity = null;
 
     public ForecastActivity() {
     }
@@ -18,11 +19,20 @@ public class ForecastActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null)
+        {
+            arrivalCity = savedInstanceState.getString("arrivalCity");
+            departureCity = savedInstanceState.getString("departureCity");
+        }
         setContentView(R.layout.forecast_activity_main);
         Bundle intentBundle = getIntent().getExtras();
+        if(intentBundle != null) {
+            arrivalCity = intentBundle.getString("arrivalCity");
+            departureCity = intentBundle.getString("departureCity");
+        }
         Bundle bundle = new Bundle();
-        bundle.putString("arrivalCity",intentBundle.getString("arrivalCity"));
-        bundle.putString("departureCity",intentBundle.getString("departureCity"));
+        bundle.putString("arrivalCity",arrivalCity);
+        bundle.putString("departureCity",departureCity);
         ForecastFragment forecastFragment = new ForecastFragment();
         forecastFragment.setArguments(bundle);
 
@@ -32,5 +42,14 @@ public class ForecastActivity extends ActionBarActivity {
                             .commit();
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("arrivalCity",arrivalCity);
+        outState.putString("departureCity",departureCity);
+        super.onSaveInstanceState(outState);
+    }
+
+
 }
 
