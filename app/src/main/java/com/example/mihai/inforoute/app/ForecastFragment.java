@@ -129,16 +129,22 @@ public class ForecastFragment extends Fragment {
         text_status.setVisibility(View.GONE);
 
         text_speed = (TextView)rootView.findViewById(R.id.list_item_speed_textview);
+        text_speed.setText("");
         text_speed.setVisibility(View.GONE);
         text_time = (TextView)rootView.findViewById(R.id.list_item_time_textview);
+        text_time.setText("");
         text_time.setVisibility(View.GONE);
         text_cons = (TextView)rootView.findViewById(R.id.list_item_consum_textview);
+        text_cons.setText("");
         text_cons.setVisibility(View.GONE);
         text_totalCons = (TextView)rootView.findViewById(R.id.list_item_consum_total_textview);
+        text_totalCons.setText("");
         text_totalCons.setVisibility(View.GONE);
         text_cost = (TextView)rootView.findViewById(R.id.list_item_cost_textview);
+        text_cost.setText("");
         text_cost.setVisibility(View.GONE);
         text_index = (TextView)rootView.findViewById(R.id.list_item_index_textview);
+        text_index.setText("");
         text_index.setVisibility(View.GONE);
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -382,8 +388,11 @@ public class ForecastFragment extends Fragment {
         }
         private String formatTime(String time)
         {
-            String[] parts = time.split(".");
-            return parts[0]+" h "+parts[1]+" min";
+            String[] parts = time.split("\\.");
+            String part1 = parts[0];
+            String part2 = parts[1];
+            String r = part1 + " h " + part2 + " min";
+            return r;
         }
 
         private String[] getRouteDataFromJson(String routeJsonStr)
@@ -395,7 +404,7 @@ public class ForecastFragment extends Fragment {
             final String OWM_VITEZA = "viteza";
             final String OWM_TIMP = "timp";
             final String OWM_CONSUM = "consum";
-            final String OWM_CONSUM_TOTAL = "consum_tota";
+            final String OWM_CONSUM_TOTAL = "consum_total";
             final String OWM_COST = "cost";
             final String OWM_INDICE = "indice";
 
@@ -520,19 +529,19 @@ public class ForecastFragment extends Fragment {
                 text_speed.setText(result[2]);
                 text_speed.setVisibility(View.VISIBLE);
 
-                text_speed.setText(result[3]);
+                text_time.setText(result[3]);
                 text_time.setVisibility(View.VISIBLE);
 
-                text_speed.setText(result[4]);
+                text_cons.setText(result[4]);
                 text_cons.setVisibility(View.VISIBLE);
 
-                text_speed.setText(result[5]);
+                text_totalCons.setText(result[5]);
                 text_totalCons.setVisibility(View.VISIBLE);
 
-                text_speed.setText(result[6]);
+                text_cost.setText(result[6]);
                 text_cost.setVisibility(View.VISIBLE);
 
-                text_speed.setText(result[7]);
+                text_index.setText(result[7]);
                 text_index.setVisibility(View.VISIBLE);
             }
         }
