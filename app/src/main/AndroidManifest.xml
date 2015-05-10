@@ -56,6 +56,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.mihai.inforoute.app.SettingsActivity" />
         </activity>
+        <provider
+            android:authorities="com.example.mihai.inforoute.app"
+            android:name=".data.RouteProvider" />
     </application>
 
 </manifest>

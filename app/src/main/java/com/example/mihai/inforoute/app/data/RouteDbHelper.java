@@ -39,8 +39,18 @@ public class RouteDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
+
+        final String SQL_CREATE_CITY_TABLE = "CREATE TABLE " + RouteContract.CityEntry.TABLE_NAME + " (" +
+                RouteContract.CityEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                RouteContract.CityEntry.COLUMN_CITY_NAME + " TEXT NOT NULL, " +
+
+                //in cazul in care orasul exista deja in baza de date
+                " UNIQUE (" + RouteContract.CityEntry.COLUMN_CITY_NAME + ") ON CONFLICT REPLACE"+
+
+                " );";
+
         final String SQL_CREATE_ROUTE_TABLE = "CREATE TABLE " + RouteContract.RouteEntry.TABLE_NAME + " (" +
-                RouteContract.RouteEntry._ID + " INTEGER PRIMARY KEY," +
+                RouteContract.RouteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 RouteContract.RouteEntry.COLUMN_START_CITY_KEY + " INTEGER NOT NULL, " +
                 RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY + " INTEGER NOT NULL, " +
                 RouteContract.RouteEntry.COLUMN_DISTANCE + " INTEGER NOT NULL, " +
@@ -50,13 +60,21 @@ public class RouteDbHelper extends SQLiteOpenHelper {
                 RouteContract.RouteEntry.COLUMN_CONSUMPTION + " INTEGER NOT NULL, " +
                 RouteContract.RouteEntry.COLUMN_TOTAL_CONSUMPTION + " REAL NOT NULL, " +
                 RouteContract.RouteEntry.COLUMN_COST + " INTEGER NOT NULL, " +
-                RouteContract.RouteEntry.COLUMN_INDEX + " REAL NOT NULL, " +
-                " );";
+                RouteContract.RouteEntry.COLUMN_INDICE + " REAL NOT NULL, " +
 
-        final String SQL_CREATE_CITY_TABLE = "CREATE TABLE " + RouteContract.CityEntry.TABLE_NAME + " (" +
-                RouteContract.CityEntry._ID + " INTEGER PRIMARY KEY," +
-                RouteContract.CityEntry.COLUMN_CITY_NAME + " TEXT NOT NULL, " +
-                " );";
+//                //legatura cu tabelul city -- trebuie sa existe deja id in acel tabel
+//                " FOREIGN KEY (" + RouteContract.RouteEntry.COLUMN_START_CITY_KEY + ") REFERENCES " +
+//                RouteContract.CityEntry.TABLE_NAME + " (" + RouteContract.CityEntry._ID + "), " +
+//
+//                //legatura cu tabelul city -- trebuie sa existe deja id in acel tabel
+//                " FOREIGN KEY (" + RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY + ") REFERENCES " +
+//                RouteContract.CityEntry.TABLE_NAME + " (" + RouteContract.CityEntry._ID + "), " +
+
+                //in cazul in care in care vreau sa introduc acelasi drum in baza de date,
+                //cu acelasi start si cu acelasi finish
+                " UNIQUE (" + RouteContract.RouteEntry.COLUMN_START_CITY_KEY + ", " +
+                RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY + ") ON CONFLICT REPLACE);";
+
 
         final String SQL_CREATE_LOCATION_TABLE = "CREATE TABLE " + LocationEntry.TABLE_NAME + " (" +
                 LocationEntry._ID + " INTEGER PRIMARY KEY," +
@@ -96,8 +114,8 @@ public class RouteDbHelper extends SQLiteOpenHelper {
                 " UNIQUE (" + WeatherEntry.COLUMN_DATE + ", " +
                 WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";
 
-        sqLiteDatabase.execSQL(SQL_CREATE_ROUTE_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_CITY_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_ROUTE_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_LOCATION_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
     }
