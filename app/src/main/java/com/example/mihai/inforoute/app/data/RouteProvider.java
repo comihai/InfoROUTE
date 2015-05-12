@@ -49,18 +49,28 @@ public class RouteProvider extends ContentProvider{
         sRouteByCityNameQueryBuilder = new SQLiteQueryBuilder();
 
         //2 inner join
+//        sRouteByCityNameQueryBuilder.setTables(
+//                RouteContract.RouteEntry.TABLE_NAME + " INNER JOIN " +
+//                        RouteContract.CityEntry.TABLE_NAME +
+//                        " ON " + RouteContract.RouteEntry.TABLE_NAME +
+//                        "." + RouteContract.RouteEntry.COLUMN_START_CITY_KEY +
+//                        " = " + RouteContract.CityEntry.TABLE_NAME +
+//                        "." + RouteContract.CityEntry._ID
+//                        + " INNER JOIN " +
+//                        RouteContract.CityEntry.TABLE_NAME +
+//                        " ON " + RouteContract.RouteEntry.TABLE_NAME +
+//                        "." + RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY +
+//                        " = " + RouteContract.CityEntry.TABLE_NAME +
+//                        "." + RouteContract.CityEntry._ID);
         sRouteByCityNameQueryBuilder.setTables(
-                RouteContract.RouteEntry.TABLE_NAME + " INNER JOIN " +
+                RouteContract.RouteEntry.TABLE_NAME + " a INNER JOIN " +
                         RouteContract.CityEntry.TABLE_NAME +
-                        " ON " + RouteContract.RouteEntry.TABLE_NAME +
-                        "." + RouteContract.RouteEntry.COLUMN_START_CITY_KEY +
-                        " = " + RouteContract.CityEntry.TABLE_NAME +
-                        "." + RouteContract.CityEntry._ID
+                        " b ON a"+ "." + RouteContract.RouteEntry.COLUMN_START_CITY_KEY +
+                        " = b" + "." + RouteContract.CityEntry._ID
                         + " INNER JOIN " +
                         RouteContract.CityEntry.TABLE_NAME +
-                        " ON " + RouteContract.RouteEntry.TABLE_NAME +
-                        "." + RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY +
-                        " = " + RouteContract.CityEntry.TABLE_NAME);
+                        " c ON a" +"." + RouteContract.RouteEntry.COLUMN_STOP_CITY_KEY +
+                        " = c" +"." + RouteContract.CityEntry._ID);
     }
 
     //location.location_setting = ?
@@ -82,9 +92,8 @@ public class RouteProvider extends ContentProvider{
 
     //orase.nume_oras = ? AND orase.nume_oras = ?
     private static final String sStartCityAndFinishCitySelection =
-            RouteContract.CityEntry.TABLE_NAME +
-                    "." + RouteContract.CityEntry.COLUMN_CITY_NAME + " = ? AND " +
-                    RouteContract.CityEntry.COLUMN_CITY_NAME + " = ? ";
+                    "b." + RouteContract.CityEntry.COLUMN_CITY_NAME + " = ? AND " +
+                    "c." +RouteContract.CityEntry.COLUMN_CITY_NAME + " = ? ";
 
     private Cursor getWeatherByLocationSetting(Uri uri, String[] projection, String sortOrder) {
         String locationSetting = RouteContract.WeatherEntry.getLocationSettingFromUri(uri);

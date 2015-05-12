@@ -1,15 +1,26 @@
 package com.example.mihai.inforoute.app;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.example.mihai.inforoute.app.data.RouteContract;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 
 public class DetailActivity extends ActionBarActivity {
@@ -57,8 +68,23 @@ public class DetailActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+        private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
+        private String mForecastStr;
+        private static final int DETAIL_LOADER = 0;
+        private static final String[] FORECAST_COLUMNS = {
+
+                RouteContract.WeatherEntry.TABLE_NAME + "." + RouteContract.WeatherEntry._ID,
+                RouteContract.WeatherEntry.COLUMN_DATE,
+                RouteContract.WeatherEntry.COLUMN_SHORT_DESC,
+                RouteContract.WeatherEntry.COLUMN_MAX_TEMP,
+                RouteContract.WeatherEntry.COLUMN_MIN_TEMP
+        };
+        public static final int COL_WEATHER_DATE = 1;
+        public static final int COL_WEATHER_DESC = 2;
+        public static final int COL_WEATHER_MAX_TEMP = 3;
+        public static final int COL_WEATHER_MIN_TEMP = 4;
         public PlaceholderFragment() {
         }
 
@@ -67,12 +93,79 @@ public class DetailActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
             Intent intent = getActivity().getIntent();
-            if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-                String forecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (intent != null) {
+                mForecastStr = intent.getDataString();
+            }
+
+            if (null != mForecastStr) {
                 ((TextView) rootView.findViewById(R.id.detail_text))
-                        .setText(forecastStr);
+                        .setText(mForecastStr);
             }
             return rootView;
+        }
+        private String formatHighLows(double high, double low) {
+            String highLowStr = Double.toString(high) + "/" + Double.toString(low);
+            return highLowStr;
+        }
+
+        private String formatDate(long dateInMillis) {
+            Date date = new Date(dateInMillis);
+            return DateFormat.getDateInstance().format(date);
+        }
+
+        @Override
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            getLoaderManager().initLoader(DETAIL_LOADER, null,this);
+            super.onActivityCreated(savedInstanceState);
+        }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.v(LOG_TAG, "In onCreateLoader");
+            Intent intent = getActivity().getIntent();
+            if (intent == null) {
+                return null;
+            }
+
+            // Now create and return a CursorLoader that will take care of
+            // creating a Cursor for the data being displayed.
+            return new CursorLoader(
+                    getActivity(),
+                    intent.getData(),
+                    FORECAST_COLUMNS,
+                    null,
+                    null,
+                    null
+            );
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.v(LOG_TAG, "In onLoadFinished");
+            if (!data.moveToFirst()) { return; }
+
+            String dateString = formatDate(
+                    data.getLong(COL_WEATHER_DATE));
+
+            String weatherDescription =
+                    data.getString(COL_WEATHER_DESC);
+
+
+            String high = Double.toString(
+                    data.getDouble(COL_WEATHER_MAX_TEMP));
+
+            String low = Double.toString(
+                    data.getDouble(COL_WEATHER_MIN_TEMP));
+
+            mForecastStr = String.format("%s - %s - %s/%s", dateString, weatherDescription, high, low);
+
+            TextView detailTextView = (TextView)getView().findViewById(R.id.detail_text);
+            detailTextView.setText(mForecastStr);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
         }
     }
 }

@@ -15,38 +15,33 @@
  */
 package com.example.mihai.inforoute.app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.mihai.inforoute.app.adapters.ForecastAdapter;
+import com.example.mihai.inforoute.app.adapters.RouteAdapter;
 import com.example.mihai.inforoute.app.data.RouteContract;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.text.SimpleDateFormat;
 
 /**
  * Encapsulates fetching the forecast and displaying it as a {@link android.widget.ListView} layout.
@@ -54,9 +49,59 @@ import java.net.URL;
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private ForecastAdapter mForecastAdapter;
-    private static final int FORECAST_LOADER = 0;
+    private RouteAdapter mRouteAdapter;
+    private static final int FORECAST_LOADER = 0, ROUTE_LOADER = 1;
     private String arrivalCity=null, departureCity = null;
     private TextView text_dist, text_status, text_speed, text_time, text_cons, text_totalCons, text_cost, text_index;
+    private static final String[] FORECAST_COLUMNS = {
+            // In this case the id needs to be fully qualified with a table name, since
+            // the content provider joins the location & weather tables in the background
+            // (both have an _id column)
+            // On the one hand, that's annoying.  On the other, you can search the weather table
+            // using the location set by the user, which is only in the Location table.
+            // So the convenience is worth it.
+            RouteContract.WeatherEntry.TABLE_NAME + "." + RouteContract.WeatherEntry._ID,
+            RouteContract.WeatherEntry.COLUMN_DATE,
+            RouteContract.WeatherEntry.COLUMN_SHORT_DESC,
+            RouteContract.WeatherEntry.COLUMN_MAX_TEMP,
+            RouteContract.WeatherEntry.COLUMN_MIN_TEMP,
+            RouteContract.LocationEntry.COLUMN_LOCATION_SETTING,
+            RouteContract.WeatherEntry.COLUMN_WEATHER_ID,
+            RouteContract.LocationEntry.COLUMN_COORD_LAT,
+            RouteContract.LocationEntry.COLUMN_COORD_LONG
+    };
+    private static final String[] ROUTE_COLUMNS = {
+            // In this case the id needs to be fully qualified with a table name, since
+            // the content provider joins the location & weather tables in the background
+            // (both have an _id column)
+            // On the one hand, that's annoying.  On the other, you can search the weather table
+            // using the location set by the user, which is only in the Location table.
+            // So the convenience is worth it.
+            RouteContract.RouteEntry.COLUMN_DISTANCE,
+            RouteContract.RouteEntry.COLUMN_STATUS,
+            RouteContract.RouteEntry.COLUMN_SPEED,
+            RouteContract.RouteEntry.COLUMN_TIME,
+            RouteContract.RouteEntry.COLUMN_CONSUMPTION,
+            RouteContract.RouteEntry.COLUMN_TOTAL_CONSUMPTION,
+            RouteContract.RouteEntry.COLUMN_COST,
+            RouteContract.RouteEntry.COLUMN_INDICE
+    };
+
+    public static final String DATE_FORMAT = "yyyyMMdd";
+
+    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
+    // must change.
+    public static final int COL_WEATHER_ID = 0;
+    public static final int COL_WEATHER_DATE = 1;
+    public static final int COL_WEATHER_DESC = 2;
+    public static final int COL_WEATHER_MAX_TEMP = 3;
+    public static final int COL_WEATHER_MIN_TEMP = 4;
+    public static final int COL_LOCATION_SETTING = 5;
+    public static final int COL_WEATHER_CONDITION_ID = 6;
+    public static final int COL_COORD_LAT = 7;
+    public static final int COL_COORD_LONG = 8;
+
+
     public ForecastFragment() {
     }
 
@@ -81,8 +126,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 getString(R.string.pref_noDays_default));
         weatherTask.execute(arrivalCity, noDays);
 
-        FetchRouteTask routeTask = new FetchRouteTask();
-        routeTask.execute(departureCity,arrivalCity);
+        String speed = prefs.getString(getString(R.string.pref_speed_key),getString(R.string.pref_speedUnits_km_h));
+
+        FetchRouteTask routeTask = new FetchRouteTask(getActivity());
+        routeTask.execute(departureCity,arrivalCity,speed);
     }
 
     @Override
@@ -109,6 +156,71 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         return super.onOptionsItemSelected(item);
     }
 
+    private String formatTime(String time)
+    {
+        String[] parts = time.split("\\.");
+        String part1 = parts[0];
+        String part2 = parts[1];
+        String r = part1 + " h " + part2 + " min";
+        return r;
+    }
+    public static String getFormattedMonthDay(Context context, long dateInMillis ) {
+        Time time = new Time();
+        time.setToNow();
+        SimpleDateFormat dbDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        SimpleDateFormat monthDayFormat = new SimpleDateFormat("MMMM dd");
+        String monthDayString = monthDayFormat.format(dateInMillis);
+        return monthDayString;
+    }
+    public static String getDayName(Context context, long dateInMillis) {
+        // If the date is today, return the localized version of "Today" instead of the actual
+        // day name.
+
+        Time t = new Time();
+        t.setToNow();
+        int julianDay = Time.getJulianDay(dateInMillis, t.gmtoff);
+        int currentJulianDay = Time.getJulianDay(System.currentTimeMillis(), t.gmtoff);
+        if (julianDay == currentJulianDay) {
+            return context.getString(R.string.today);
+        } else if ( julianDay == currentJulianDay +1 ) {
+            return context.getString(R.string.tomorrow);
+        } else {
+            Time time = new Time();
+            time.setToNow();
+            // Otherwise, the format is just the day of the week (e.g "Wednesday".
+            SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE");
+            return dayFormat.format(dateInMillis);
+        }
+    }
+    public static String getFormatDayString(Context context, long dateInMillis) {
+
+        Time time = new Time();
+        time.setToNow();
+        long currentTime = System.currentTimeMillis();
+        int julianDay = Time.getJulianDay(dateInMillis, time.gmtoff);
+        int currentJulianDay = Time.getJulianDay(currentTime, time.gmtoff);
+
+        // If the date we're building the String for is today's date, the format
+        // is "Today, June 24"
+        if (julianDay == currentJulianDay) {
+            String today = context.getString(R.string.today);
+            int formatId = R.string.format_full_friendly_date;
+            return String.format(context.getString(
+                    formatId,
+                    today,
+                    getFormattedMonthDay(context, dateInMillis)));
+        } else if ( julianDay < currentJulianDay + 7 ) {
+            // If the input date is less than a week in the future, just return the day name.
+            return getDayName(context, dateInMillis);
+        } else {
+            // Otherwise, use the form "Mon Jun 3"
+            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
+            return shortenedDateFormat.format(dateInMillis);
+        }
+    }
+    public static String formatTemperature(Context context, double temperature) {
+        return context.getString(R.string.format_temperature, temperature);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -116,260 +228,137 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
 
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
+        mRouteAdapter = new RouteAdapter(getActivity(),null,0);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        text_dist = (TextView)rootView.findViewById(R.id.list_item_distance_textview);
-        text_dist.setText("");
-        text_dist.setVisibility(View.GONE);
-        text_status = (TextView)rootView.findViewById(R.id.list_item_status_textview);
-        text_status.setText("");
-        text_status.setVisibility(View.GONE);
-
-        text_speed = (TextView)rootView.findViewById(R.id.list_item_speed_textview);
-        text_speed.setText("");
-        text_speed.setVisibility(View.GONE);
-        text_time = (TextView)rootView.findViewById(R.id.list_item_time_textview);
-        text_time.setText("");
-        text_time.setVisibility(View.GONE);
-        text_cons = (TextView)rootView.findViewById(R.id.list_item_consum_textview);
-        text_cons.setText("");
-        text_cons.setVisibility(View.GONE);
-        text_totalCons = (TextView)rootView.findViewById(R.id.list_item_consum_total_textview);
-        text_totalCons.setText("");
-        text_totalCons.setVisibility(View.GONE);
-        text_cost = (TextView)rootView.findViewById(R.id.list_item_cost_textview);
-        text_cost.setText("");
-        text_cost.setVisibility(View.GONE);
-        text_index = (TextView)rootView.findViewById(R.id.list_item_index_textview);
-        text_index.setText("");
-        text_index.setVisibility(View.GONE);
 
 
         // Get a reference to the ListView, and attach this adapter to it.
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                String forecast = mForecastAdapter.getItem(position);
-//                Intent intent = new Intent(getActivity(), DetailActivity.class)
-//                        .putExtra(Intent.EXTRA_TEXT, forecast);
-//                startActivity(intent);
-//            }
-//        });
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+                            .setData(RouteContract.WeatherEntry.buildWeatherLocationWithDate(
+                                    arrivalCity, cursor.getLong(COL_WEATHER_DATE)
+                            ));
+                    startActivity(intent);
+                }
+            }
+        });
         return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(ROUTE_LOADER, null, this);
         getLoaderManager().initLoader(FORECAST_LOADER, null, this);
+
+
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = RouteContract.WeatherEntry.COLUMN_DATE + " ASC";
-        Uri weatherForLocationUri = RouteContract.WeatherEntry.buildWeatherLocationWithStartDate(
-                arrivalCity, System.currentTimeMillis());
+        switch (id) {
+            case FORECAST_LOADER: {
+                String sortOrder = RouteContract.WeatherEntry.COLUMN_DATE + " ASC";
+                Uri weatherForLocationUri = RouteContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                        arrivalCity, System.currentTimeMillis());
 
-        return new CursorLoader(getActivity(),
-                weatherForLocationUri,
-                null,
-                null,
-                null,
-                sortOrder);
+                return new CursorLoader(getActivity(),
+                        weatherForLocationUri,
+                        FORECAST_COLUMNS,
+                        null,
+                        null,
+                        sortOrder);
+            }
+            case ROUTE_LOADER:
+            {
+                String sortOrder = RouteContract.RouteEntry.COLUMN_DISTANCE + " ASC";
+                Uri routeStartStopUri = RouteContract.RouteEntry.buildRouteStartLocationWithStopLocation(departureCity,arrivalCity);
+
+                return new CursorLoader(getActivity(),
+                        routeStartStopUri,
+                        ROUTE_COLUMNS,
+                        null,
+                        null,
+                        sortOrder);
+            }
+            default:return null;
+        }
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mForecastAdapter.swapCursor(data);
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if(loader.getId() == 0) {
+            if (!cursor.moveToFirst()) {
+                return;
+            }
+            mForecastAdapter.swapCursor(cursor);
+        }
+        else
+        {
+            if (!cursor.moveToFirst())
+            {
+                return;
+            }
+            TextView text_dist = (TextView)getView().findViewById(R.id.list_item_distance_textview);
+
+            TextView text_status = (TextView)getView().findViewById(R.id.list_item_status_textview);
+
+            TextView text_speed = (TextView)getView().findViewById(R.id.list_item_speed_textview);
+
+            TextView text_time = (TextView)getView().findViewById(R.id.list_item_time_textview);
+
+            TextView text_cons = (TextView)getView().findViewById(R.id.list_item_consum_textview);
+
+            TextView text_totalCons = (TextView)getView().findViewById(R.id.list_item_consum_total_textview);
+
+            TextView text_cost = (TextView)getView().findViewById(R.id.list_item_cost_textview);
+
+            TextView text_index = (TextView)getView().findViewById(R.id.list_item_index_textview);
+
+            // Extract properties from cursor
+            int distance = cursor.getInt(0);
+            String status = cursor.getString(1);
+            int speed = cursor.getInt(2);
+            double time = cursor.getDouble(3);
+            int consumption = cursor.getInt(4);
+            double tConsumption = cursor.getDouble(5);
+            int cost = cursor.getInt(6);
+            double indice = cursor.getDouble(7);
+
+            // Populate fields with extracted properties
+            text_dist.setText(Integer.toString(distance) + " Km");
+            text_status.setText(status);
+            //TODO
+            //sa utilizez shared preferences pentru a afisa in km/h sau m/s
+            text_speed.setText(Integer.toString(speed) + " Km/h");
+            text_time.setText(formatTime(Double.toString(time)));
+            text_cons.setText(Integer.toString(consumption) + " l/Km");
+            text_totalCons.setText(Double.toString(tConsumption)+ " l");
+            text_cost.setText(Integer.toString(cost) + " RON");
+            text_index.setText(Double.toString(indice));
+        }
+        //mRouteAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mForecastAdapter.swapCursor(null);
+        //if(loader.getId() == 0)
+            mForecastAdapter.swapCursor(null);
+        //else
+        //    mRouteAdapter.swapCursor(null);
     }
 
 
-    public class FetchRouteTask extends AsyncTask<String, Void, String[]> {
 
-        private final String LOG_TAG = FetchRouteTask.class.getSimpleName();
-        private String formatSpeed(String speed, String unitType)
-        {
-            int speedInt = Integer.parseInt(speed);
-            String r = null;
-            if(unitType.equals(getString(R.string.pref_speedUnits_m_s)))
-            {
-                speedInt = speedInt * 10/36;
-                r = Integer.toString(speedInt) + " m/s";
-            }
-            else
-            {
-                r = Integer.toString(speedInt) + " Km/h";
-            }
-            return r;
-        }
-        private String formatTime(String time)
-        {
-            String[] parts = time.split("\\.");
-            String part1 = parts[0];
-            String part2 = parts[1];
-            String r = part1 + " h " + part2 + " min";
-            return r;
-        }
-
-        private String[] getRouteDataFromJson(String routeJsonStr)
-                throws JSONException {
-
-            // These are the names of the JSON objects that need to be extracted.
-            final String OWM_DISTANTA = "distanta";
-            final String OWM_STATUS = "status";
-            final String OWM_VITEZA = "viteza";
-            final String OWM_TIMP = "timp";
-            final String OWM_CONSUM = "consum";
-            final String OWM_CONSUM_TOTAL = "consum_total";
-            final String OWM_COST = "cost";
-            final String OWM_INDICE = "indice";
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String speed = sharedPreferences.getString(getString(R.string.pref_speed_key),getString(R.string.pref_speedUnits_km_h));
-
-                    JSONObject routeJson = new JSONObject(routeJsonStr);
-            String resultStrs[] = new String[8];
-
-            resultStrs[0] = routeJson.getString(OWM_DISTANTA) + " Km";
-            resultStrs[1] = routeJson.getString(OWM_STATUS);
-            resultStrs[2] = formatSpeed(routeJson.getString(OWM_VITEZA),speed);
-            resultStrs[3] = formatTime(routeJson.getString(OWM_TIMP));
-            resultStrs[4] = routeJson.getString(OWM_CONSUM) + " l/Km";
-            resultStrs[5] = routeJson.getString(OWM_CONSUM_TOTAL) + " l";
-            resultStrs[6] = routeJson.getString(OWM_COST) + " RON";
-            resultStrs[7] = routeJson.getString(OWM_INDICE);
-            return resultStrs;
-        }
-        @Override
-        protected String[] doInBackground(String... params) {
-            Log.v(LOG_TAG, "Params  : "+ params[0] + " "+params[1]);
-            // If there's no zip code, there's nothing to look up.  Verify size of params.
-            if (params.length == 0) {
-                return null;
-            }
-
-            // These two need to be declared outside the try/catch
-            // so that they can be closed in the finally block.
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String routeJsonStr = null;
-
-
-            try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are avaiable at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
-                final String ROUTE_BASE_URL =
-                        "http://192.168.0.106:8080/routeInfo/index.php?";
-                final String NAME1_PARAM = "name1";
-                final String NAME2_PARAM = "name2";
-
-
-                Uri builtUri = Uri.parse(ROUTE_BASE_URL).buildUpon()
-                        .appendQueryParameter(NAME1_PARAM, params[0])
-                        .appendQueryParameter(NAME2_PARAM, params[1])
-                        .build();
-
-                URL url = new URL(builtUri.toString());
-                Log.v(LOG_TAG, "Url  : "+url.toString());
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                routeJsonStr = buffer.toString();
-                Log.v(LOG_TAG, "Jsonul route este  : "+routeJsonStr);
-            }
-            catch (IOException e)
-            {
-                Log.e(LOG_TAG, "Error ", e);
-                return null;
-            }
-            finally
-            {
-                if (urlConnection != null)
-                {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            try
-            {
-                return getRouteDataFromJson(routeJsonStr);
-            }
-            catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-            if (result != null) {
-                text_dist.setText(result[0]);
-                text_dist.setVisibility(View.VISIBLE);
-
-                text_status.setText(result[1]);
-                text_status.setVisibility(View.VISIBLE);
-
-                text_speed.setText(result[2]);
-                text_speed.setVisibility(View.VISIBLE);
-
-                text_time.setText(result[3]);
-                text_time.setVisibility(View.VISIBLE);
-
-                text_cons.setText(result[4]);
-                text_cons.setVisibility(View.VISIBLE);
-
-                text_totalCons.setText(result[5]);
-                text_totalCons.setVisibility(View.VISIBLE);
-
-                text_cost.setText(result[6]);
-                text_cost.setVisibility(View.VISIBLE);
-
-                text_index.setText(result[7]);
-                text_index.setVisibility(View.VISIBLE);
-            }
-        }
-    }
 }

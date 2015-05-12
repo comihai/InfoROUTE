@@ -58,7 +58,10 @@
         </activity>
         <provider
             android:authorities="com.example.mihai.inforoute.app"
-            android:name=".data.RouteProvider" />
+            android:name=".data.RouteProvider"
+            android:enabled="true"
+            android:exported="true"/>
+
     </application>
 
 </manifest>

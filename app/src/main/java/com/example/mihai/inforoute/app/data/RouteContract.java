@@ -106,9 +106,16 @@ public class RouteContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
         //folosit pentru a lua un rand din tabel in functie de locatia de start si cea de finish
-        public static Uri buildRouteStartLocationWithStopLocation(long start, long stop) {
+        public static Uri buildRouteStartLocationIdWithStopLocationId(long start, long stop) {
             return CONTENT_URI.buildUpon().appendQueryParameter(COLUMN_START_CITY_KEY,Long.toString(start))
                     .appendQueryParameter(COLUMN_STOP_CITY_KEY, Long.toString(stop)).build();
+        }
+        //construirea URI in fuctie de nume start si finish
+        public static Uri buildRouteStartLocationWithStopLocation(
+                String startCity, String finishCity) {
+
+            return CONTENT_URI.buildUpon().appendPath(startCity)
+                    .appendPath(finishCity).build();
         }
     }
     /*
