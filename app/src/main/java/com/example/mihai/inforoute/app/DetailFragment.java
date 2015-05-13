@@ -111,7 +111,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (data != null && data.moveToFirst()) {
 
             int weatherId = data.getInt(COL_WEATHER_CONDITION_ID);
-            mIconView.setImageResource(R.mipmap.ic_launcher);
+            mIconView.setImageResource(ForecastFragment.getArtResourceForWeatherCondition(weatherId));
 
             long date = data.getLong(COL_WEATHER_DATE);
             String friendlyDateText = ForecastFragment.getDayName(getActivity(), date);

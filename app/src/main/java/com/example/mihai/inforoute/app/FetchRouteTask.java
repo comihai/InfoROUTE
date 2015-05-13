@@ -182,7 +182,7 @@ public class FetchRouteTask extends AsyncTask<String, Void, Void> {
             // Possible parameters are avaiable at OWM's forecast API page, at
             // http://openweathermap.org/API#forecast
             final String ROUTE_BASE_URL =
-                    "http://192.168.56.1:8080/routeInfo/index.php?";
+                    "http://192.168.0.106:8080/routeInfo/index.php?";
             final String NAME1_PARAM = "name1";
             final String NAME2_PARAM = "name2";
 

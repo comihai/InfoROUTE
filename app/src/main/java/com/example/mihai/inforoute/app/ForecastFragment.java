@@ -194,29 +194,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
     public static String getFormatDayString(Context context, long dateInMillis) {
 
-        Time time = new Time();
-        time.setToNow();
-        long currentTime = System.currentTimeMillis();
-        int julianDay = Time.getJulianDay(dateInMillis, time.gmtoff);
-        int currentJulianDay = Time.getJulianDay(currentTime, time.gmtoff);
-
-        // If the date we're building the String for is today's date, the format
-        // is "Today, June 24"
-        if (julianDay == currentJulianDay) {
-            String today = context.getString(R.string.today);
-            int formatId = R.string.format_full_friendly_date;
-            return String.format(context.getString(
-                    formatId,
-                    today,
-                    getFormattedMonthDay(context, dateInMillis)));
-        } else if ( julianDay < currentJulianDay + 7 ) {
-            // If the input date is less than a week in the future, just return the day name.
-            return getDayName(context, dateInMillis);
-        } else {
-            // Otherwise, use the form "Mon Jun 3"
             SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
             return shortenedDateFormat.format(dateInMillis);
-        }
     }
     public static String formatTemperature(Context context, double temperature) {
         return context.getString(R.string.format_temperature, temperature);
@@ -243,6 +222,62 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             direction = "NW";
         }
         return String.format(context.getString(windFormat), windSpeed, direction);
+    }
+    public static int getIconResourceForWeatherCondition(int weatherId) {
+        // Based on weather code data found at:
+        // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+        if (weatherId >= 200 && weatherId <= 232) {
+            return R.drawable.ic_storm;
+        } else if (weatherId >= 300 && weatherId <= 321) {
+            return R.drawable.ic_light_rain;
+        } else if (weatherId >= 500 && weatherId <= 504) {
+            return R.drawable.ic_rain;
+        } else if (weatherId == 511) {
+            return R.drawable.ic_snow;
+        } else if (weatherId >= 520 && weatherId <= 531) {
+            return R.drawable.ic_rain;
+        } else if (weatherId >= 600 && weatherId <= 622) {
+            return R.drawable.ic_snow;
+        } else if (weatherId >= 701 && weatherId <= 761) {
+            return R.drawable.ic_fog;
+        } else if (weatherId == 761 || weatherId == 781) {
+            return R.drawable.ic_storm;
+        } else if (weatherId == 800) {
+            return R.drawable.ic_clear;
+        } else if (weatherId == 801) {
+            return R.drawable.ic_light_clouds;
+        } else if (weatherId >= 802 && weatherId <= 804) {
+            return R.drawable.ic_cloudy;
+        }
+        return -1;
+    }
+    public static int getArtResourceForWeatherCondition(int weatherId) {
+        // Based on weather code data found at:
+        // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+        if (weatherId >= 200 && weatherId <= 232) {
+            return R.drawable.art_storm;
+        } else if (weatherId >= 300 && weatherId <= 321) {
+            return R.drawable.art_light_rain;
+        } else if (weatherId >= 500 && weatherId <= 504) {
+            return R.drawable.art_rain;
+        } else if (weatherId == 511) {
+            return R.drawable.art_snow;
+        } else if (weatherId >= 520 && weatherId <= 531) {
+            return R.drawable.art_rain;
+        } else if (weatherId >= 600 && weatherId <= 622) {
+            return R.drawable.art_snow;
+        } else if (weatherId >= 701 && weatherId <= 761) {
+            return R.drawable.art_fog;
+        } else if (weatherId == 761 || weatherId == 781) {
+            return R.drawable.art_storm;
+        } else if (weatherId == 800) {
+            return R.drawable.art_clear;
+        } else if (weatherId == 801) {
+            return R.drawable.art_light_clouds;
+        } else if (weatherId >= 802 && weatherId <= 804) {
+            return R.drawable.art_clouds;
+        }
+        return -1;
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

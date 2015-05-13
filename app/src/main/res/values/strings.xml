@@ -11,12 +11,16 @@
     <string name="title_activity_settings">Settings</string>
     <string name="question">Enter your starting point and finish point of your route to find information about weather and road conditions :</string>
     <string-array name="city_arrays">
-        <item>Bucuresti</item>
+        <!--pentru aceste orase sunt oferite date despre rute -->
         <item>Brasov</item>
-        <item>Craiova</item>
-        <item>Constanta</item>
-        <item>Sibiu</item>
+        <item>Bucuresti</item>
         <item>Cluj-Napoca</item>
+        <item>Constanta</item>
+        <item>Craiova</item>
+        <item>Iasi</item>
+        <item>Timisoara</item>
+        <item>Sibiu</item>
+
     </string-array>
     <string name="title_activity_detail">DetailActivity</string>
     <string name="pref_speed_label">Speed units</string>

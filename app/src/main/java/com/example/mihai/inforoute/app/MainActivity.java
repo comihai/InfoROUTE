@@ -8,12 +8,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
     private Spinner spinner1, spinner2;
     private Button btnCalculate;
+    private ImageView start_image, finsh_image, dir_image;
     public final static String EXTRA_MESSAGE = "com.example.mihai.inforoute.app.MESSAGE";
 
 
@@ -21,6 +23,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        start_image = (ImageView) findViewById(R.id.start_icon);
+        start_image.setImageResource(R.drawable.start);
+        finsh_image = (ImageView) findViewById(R.id.finish_icon);
+        finsh_image.setImageResource(R.drawable.finish);
         addItemsOnSpinner2();
         addListenerOnButton();
         addListenerOnSpinnerItemSelection();

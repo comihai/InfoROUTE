@@ -24,10 +24,6 @@ public class ForecastAdapter extends CursorAdapter {
         super(context, c, flags);
     }
 
-    private static final int VIEW_TYPE_COUNT = 2;
-    private static final int VIEW_TYPE_TODAY = 0;
-    private static final int VIEW_TYPE_FUTURE_DAY = 1;
-
     public static class ViewHolder {
         public final ImageView iconView;
         public final TextView dateView;
@@ -56,18 +52,7 @@ public class ForecastAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        int viewType = getItemViewType(cursor.getPosition());
-        int layoutId = -1;
-        switch (viewType) {
-            case VIEW_TYPE_TODAY: {
-                layoutId = R.layout.list_item_forecast_today;
-                break;
-            }
-            case VIEW_TYPE_FUTURE_DAY: {
-                layoutId = R.layout.list_item_forecast;
-                break;
-            }
-        }
+        int layoutId = R.layout.list_item_forecast;
 
         View view = LayoutInflater.from(context).inflate(layoutId, parent, false);
 
@@ -82,7 +67,8 @@ public class ForecastAdapter extends CursorAdapter {
 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
-        viewHolder.iconView.setImageResource(R.mipmap.ic_launcher);
+        viewHolder.iconView.setImageResource(ForecastFragment.getIconResourceForWeatherCondition(
+        cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID)));
 
         long dateInMillis = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);
         viewHolder.dateView.setText(ForecastFragment.getFormatDayString(context, dateInMillis));
@@ -95,14 +81,5 @@ public class ForecastAdapter extends CursorAdapter {
 
         double low = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
         viewHolder.lowTempView.setText(ForecastFragment.formatTemperature(context,low));
-    }
-    @Override
-    public int getItemViewType(int position) {
-        return position == 0 ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return VIEW_TYPE_COUNT;
     }
 }
